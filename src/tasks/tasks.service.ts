@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Task, TasksStatus } from './tasks.model';
 import { randomUUID } from 'crypto';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { TaskFilterDto } from './dto/task-filter.dto';
+import { UpdateTaskStatus } from './dto/update-task-dto';
 
 
 @Injectable()
@@ -13,17 +14,17 @@ export class TasksService {
         return this.tasks;
     }
 
-    getTaskWithFilter(filter : TaskFilterDto) : Task[] {
-        const {search , status} = filter;
+    getTaskWithFilter(filter: TaskFilterDto): Task[] {
+        const { search, status } = filter;
         let task = this.getAllTasks();
 
-        if(status){
+        if (status) {
             task = task.filter((task) => task.status === filter.status)
         }
 
-        if(search){
+        if (search) {
             task = task.filter((task) => {
-                if(task.title.includes(search) || task.title.includes(search)){
+                if (task.title.includes(search) || task.title.includes(search)) {
                     return true;
                 }
                 return false;
@@ -50,21 +51,21 @@ export class TasksService {
         const task = this.tasks.find((task) => task.id === id);
 
         if (!task) {
-            throw new Error(`Task with id ${id} not found`);
+            throw new NotFoundException(`Task with id ${id} not found`);
         }
 
         return task;
     }
 
-
     deleteTaskById(id: string): void {
-        const tsk = this.tasks.filter((task) => task.id !== id);
-        this.tasks = tsk;
+        const found = this.getTaskById(id);
+        this.tasks = this.tasks.filter((task) => task.id !== found.id);
     }
 
+    
     updateStatus(id: string, status: TasksStatus): void {
         const task = this.getTaskById(id);
-        if (!task)  throw new Error(`Task with id ${id} not found`);
+        if (!task) throw new Error(`Task with id ${id} not found`);
         task.status = status;
     }
 }

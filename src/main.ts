@@ -5,7 +5,7 @@ import { AllExceptionsFilter } from './tasks/all-response.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(TasksModule);
-  app.useGlobalFilters(new AllExceptionsFilter());
+  // app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalInterceptors(new ResponseWrapperInterceptor)
   await app.listen(process.env.PORT ?? 3000);
 }
