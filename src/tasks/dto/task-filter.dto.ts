@@ -1,6 +1,11 @@
-import { TasksStatus } from "../tasks.model";
+import { IsEnum, IsOptional } from 'class-validator';
+import { TasksStatus } from '../tasks.model';
 
 export class TaskFilterDto {
-    status?: TasksStatus;
-    search?: string;
+  @IsOptional()
+  @IsEnum(TasksStatus)
+  status?: TasksStatus;
+
+  @IsOptional()
+  search?: string;
 }
