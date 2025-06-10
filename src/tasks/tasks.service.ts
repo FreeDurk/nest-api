@@ -4,6 +4,7 @@ import { Task } from './task.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { TaskFilterDto } from './dto/task-filter.dto';
 import { TaskRepository } from './repositories/task.repository';
+import { TasksStatus } from './tasks-status-enum';
 
 @Injectable()
 export class TasksService {
@@ -39,12 +40,19 @@ export class TasksService {
 
     return task;
   }
-  // deleteTaskById(id: string): void {
-  //   const found = this.getTaskById(id);
-  //   this.tasks = this.tasks.filter((task) => task.id !== found.id);
-  // }
-  // updateStatus(id: string, status: TasksStatus): void {
-  //   const task = this.getTaskById(id);
-  //   task.status = status;
-  // }
+  async deleteTaskById(id: string): Promise<void> {
+    // other way but it calls db twice
+    // const task = await this.getTaskById(id); first call
+    // await this.taskRepo.remove(task); second call
+
+    const result = await this.taskRepo.delete(id);
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`Task with id ${id} not found`);
+    }
+  }
+
+  async updateStatus(id: string, status: TasksStatus): Promise<void> {
+    await this.taskRepo.update({ id: id }, { status: status });
+  }
 }
