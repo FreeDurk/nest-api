@@ -11,9 +11,8 @@ export class TasksService {
   // constructor(@InjectRepository(Task) private taskRepo: Repository<Task>) {} //other way of repository, straightforward repo implementation
   constructor(private taskRepo: TaskRepository) {}
 
-  async getAllTasks(): Promise<Task[]> {
-    const tasks = await this.taskRepo.find();
-    return tasks;
+  async getAllTasks(filter: TaskFilterDto): Promise<Task[]> {
+    return await this.taskRepo.getTasks(filter);
   }
   async getTaskWithFilter(filter: TaskFilterDto): Promise<Task[]> {
     const { search, status } = filter;
