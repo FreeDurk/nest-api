@@ -5,14 +5,15 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { TaskFilterDto } from './dto/task-filter.dto';
 import { TaskRepository } from './repositories/task.repository';
 import { TasksStatus } from './tasks-status-enum';
+import { User } from 'src/auth/entity/user-entity';
 
 @Injectable()
 export class TasksService {
   // constructor(@InjectRepository(Task) private taskRepo: Repository<Task>) {} //other way of repository, straightforward repo implementation
   constructor(private taskRepo: TaskRepository) {}
 
-  async getAllTasks(filter: TaskFilterDto): Promise<Task[]> {
-    return await this.taskRepo.getTasks(filter);
+  async getAllTasks(filter: TaskFilterDto, user: User): Promise<Task[]> {
+    return await this.taskRepo.getTasks(filter, user);
   }
   async getTaskWithFilter(filter: TaskFilterDto): Promise<Task[]> {
     const { search, status } = filter;
@@ -26,12 +27,12 @@ export class TasksService {
     return tasks;
   }
 
-  createTask(task: CreateTaskDto): Promise<Task> {
-    return this.taskRepo.createTask(task);
+  createTask(task: CreateTaskDto, user: User): Promise<Task> {
+    return this.taskRepo.createTask(task, user);
   }
 
-  async getTaskById(id: string): Promise<Task> {
-    const task = await this.taskRepo.findOne({ where: { id } });
+  async getTaskById(id: string, user: User): Promise<Task> {
+    const task = await this.taskRepo.findOne({ where: { id, user } });
 
     if (!task) {
       throw new NotFoundException(`Task with id ${id} not found`);
@@ -39,19 +40,23 @@ export class TasksService {
 
     return task;
   }
-  async deleteTaskById(id: string): Promise<void> {
+  async deleteTaskById(id: string, user: User): Promise<void> {
     // other way but it calls db twice
     // const task = await this.getTaskById(id); first call
     // await this.taskRepo.remove(task); second call
 
-    const result = await this.taskRepo.delete(id);
+    const result = await this.taskRepo.delete({ id, user });
 
     if (result.affected === 0) {
       throw new NotFoundException(`Task with id ${id} not found`);
     }
   }
 
-  async updateStatus(id: string, status: TasksStatus): Promise<void> {
-    await this.taskRepo.update({ id: id }, { status: status });
+  async updateStatus(
+    id: string,
+    status: TasksStatus,
+    user: User,
+  ): Promise<void> {
+    await this.taskRepo.update({ id, user }, { status: status });
   }
 }
